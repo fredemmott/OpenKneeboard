@@ -127,14 +127,6 @@ jobs:
           dotnet publish `
             --configuration Release `
             --output "${{github.workspace}}/build/out/${{matrix.config}}/installer-generator"
-      - name: Attach bundle
-        if: ${{ matrix.config != 'Debug' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: OpenKneeboard-GHA${{github.run_number}}
-          path: |
-            build/out/${{matrix.config}}
-            !build/out/${{matrix.config}}/pdb
       - name: Install WiX
         run: |
           dotnet tool install --global wix --version 5.0.2
@@ -153,12 +145,6 @@ jobs:
           $InstallerName = (Get-Item $InstallerPath).Name
           Add-Content $env:GITHUB_OUTPUT "installer-path=${InstallerPath}"
           Add-Content $env:GITHUB_OUTPUT "installer-name=${InstallerName}"
-      - name: Upload unsigned installer
-        if: ${{ matrix.config != 'Debug' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{steps.build-installer.outputs.installer-name}}
-          path: ${{steps.build-installer.outputs.installer-path}}
       - name: Generate release notes
         if: github.ref_type == 'tag' && matrix.config != 'Debug'
         id: release-notes
